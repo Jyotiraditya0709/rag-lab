@@ -1,0 +1,13 @@
+[project]
+name = "ragl"
+version = "0.1.0"
+description = "Core library for RAG Lab: chunking, retrieval and evaluation."
+authors = [
+    { name = "Jyotiraditya Mishra", email = "mishrajyotiraditya49@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
