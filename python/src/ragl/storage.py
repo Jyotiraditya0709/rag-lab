@@ -1,7 +1,8 @@
 from uuid import UUID, uuid4
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import String, Text
+from sqlalchemy import Computed, Index, String, Text
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
@@ -11,6 +12,15 @@ from ragl.models import Chunk
 
 class ChunkRecord(Base):
     __tablename__ = "chunks"
+    __table_args__ = (
+        Index("ix_chunks_tsv", "tsv", postgresql_using="gin"),
+        Index(
+            "ix_chunks_embedding",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),
@@ -22,6 +32,9 @@ class ChunkRecord(Base):
     start_char: Mapped[int]
     end_char: Mapped[int]
     embedding: Mapped[list[float] | None] = mapped_column(Vector(1536))
+    tsv: Mapped[str] = mapped_column(
+        TSVECTOR, Computed("to_tsvector('english', text)", persisted=True)
+    )
 
 
 def create_tables() -> None:
